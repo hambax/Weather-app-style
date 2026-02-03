@@ -1,0 +1,1299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weather App</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --border-width: 3px;
+      --shadow-offset: 4px;
+      --radius: 16px;
+      --radius-sm: 12px;
+      --black: #1A1A1A;
+      --white: #FFFFFF;
+      --bg-primary: #FFE156;
+      --accent: #FF6B6B;
+      --blue: #4ECDC4;
+      --purple: #A855F7;
+      --green: #22C55E;
+      --orange: #FB923C;
+    }
+
+    body {
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+      min-height: 100vh;
+      transition: all 0.3s ease;
+    }
+
+    /* ========== NEOBRUTALIST THEME ========== */
+    body.neobrutalist {
+      background: var(--bg-primary);
+    }
+
+    .neobrutalist .container {
+      max-width: 430px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .neobrutalist .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .neobrutalist .location {
+      font-size: 24px;
+      font-weight: 900;
+      color: var(--black);
+    }
+
+    .neobrutalist .style-btn {
+      width: 52px;
+      height: 52px;
+      background: var(--white);
+      border: 3px solid var(--black);
+      border-radius: 12px;
+      box-shadow: 4px 4px 0 var(--black);
+      cursor: pointer;
+      transition: all 0.1s;
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .neobrutalist .style-btn:hover {
+      transform: translate(2px, 2px);
+      box-shadow: 2px 2px 0 var(--black);
+    }
+
+    .neobrutalist .style-btn:active {
+      transform: translate(4px, 4px);
+      box-shadow: none;
+    }
+
+    .neobrutalist .main-card {
+      background: var(--white);
+      border: 3px solid var(--black);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 6px 6px 0 var(--black);
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .neobrutalist .weather-icon {
+      font-size: 80px;
+      margin-bottom: 10px;
+    }
+
+    .neobrutalist .temperature {
+      font-size: 72px;
+      font-weight: 900;
+      color: var(--black);
+      line-height: 1;
+    }
+
+    .neobrutalist .condition {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--black);
+      margin-top: 8px;
+    }
+
+    .neobrutalist .feels-like {
+      font-size: 14px;
+      font-weight: 600;
+      color: #666;
+      margin-top: 4px;
+    }
+
+    .neobrutalist .section-title {
+      font-size: 14px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin: 24px 0 12px;
+      color: var(--black);
+    }
+
+    .neobrutalist .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+    }
+
+    .neobrutalist .stat-card {
+      background: var(--white);
+      border: 3px solid var(--black);
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 4px 4px 0 var(--black);
+    }
+
+    .neobrutalist .stat-card.humidity { background: #E0F2FE; }
+    .neobrutalist .stat-card.wind { background: #DCFCE7; }
+    .neobrutalist .stat-card.uv { background: #FEF3C7; }
+    .neobrutalist .stat-card.rain { background: #F3E8FF; }
+
+    .neobrutalist .stat-icon {
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+
+    .neobrutalist .stat-label {
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #666;
+    }
+
+    .neobrutalist .stat-value {
+      font-size: 24px;
+      font-weight: 900;
+      color: var(--black);
+    }
+
+    .neobrutalist .forecast-scroll {
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      padding-bottom: 10px;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .neobrutalist .forecast-scroll::-webkit-scrollbar { display: none; }
+
+    .neobrutalist .forecast-card {
+      flex-shrink: 0;
+      background: var(--white);
+      border: 3px solid var(--black);
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 4px 4px 0 var(--black);
+      text-align: center;
+      min-width: 90px;
+    }
+
+    .neobrutalist .forecast-day {
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      color: #666;
+    }
+
+    .neobrutalist .forecast-icon {
+      font-size: 32px;
+      margin: 8px 0;
+    }
+
+    .neobrutalist .forecast-temp {
+      font-size: 18px;
+      font-weight: 900;
+      color: var(--black);
+    }
+
+    .neobrutalist .forecast-low {
+      font-size: 14px;
+      font-weight: 600;
+      color: #999;
+    }
+
+    /* ========== GLASSMORPHIC THEME ========== */
+    body.glassmorphic {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+      min-height: 100vh;
+    }
+
+    .glassmorphic .container {
+      max-width: 430px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .glassmorphic .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .glassmorphic .location {
+      font-size: 24px;
+      font-weight: 700;
+      color: white;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    }
+
+    .glassmorphic .style-btn {
+      width: 48px;
+      height: 48px;
+      background: rgba(255,255,255,0.2);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 14px;
+      cursor: pointer;
+      font-size: 18px;
+      transition: all 0.3s ease;
+      color: white;
+    }
+
+    .glassmorphic .style-btn:hover {
+      background: rgba(255,255,255,0.3);
+      transform: scale(1.05);
+    }
+
+    .glassmorphic .main-card {
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 24px;
+      padding: 32px;
+      margin-bottom: 20px;
+      text-align: center;
+      color: white;
+    }
+
+    .glassmorphic .weather-icon {
+      font-size: 80px;
+      margin-bottom: 10px;
+      filter: drop-shadow(0 4px 10px rgba(0,0,0,0.2));
+    }
+
+    .glassmorphic .temperature {
+      font-size: 72px;
+      font-weight: 300;
+      color: white;
+      line-height: 1;
+      text-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    }
+
+    .glassmorphic .condition {
+      font-size: 20px;
+      font-weight: 500;
+      color: rgba(255,255,255,0.9);
+      margin-top: 8px;
+    }
+
+    .glassmorphic .feels-like {
+      font-size: 14px;
+      font-weight: 400;
+      color: rgba(255,255,255,0.7);
+      margin-top: 4px;
+    }
+
+    .glassmorphic .section-title {
+      font-size: 14px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin: 24px 0 12px;
+      color: rgba(255,255,255,0.8);
+    }
+
+    .glassmorphic .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+    }
+
+    .glassmorphic .stat-card {
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 16px;
+      padding: 16px;
+      color: white;
+    }
+
+    .glassmorphic .stat-icon {
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+
+    .glassmorphic .stat-label {
+      font-size: 12px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: rgba(255,255,255,0.7);
+    }
+
+    .glassmorphic .stat-value {
+      font-size: 24px;
+      font-weight: 600;
+      color: white;
+    }
+
+    .glassmorphic .forecast-scroll {
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      padding-bottom: 10px;
+    }
+
+    .glassmorphic .forecast-scroll::-webkit-scrollbar { display: none; }
+
+    .glassmorphic .forecast-card {
+      flex-shrink: 0;
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 16px;
+      padding: 16px;
+      text-align: center;
+      min-width: 85px;
+      color: white;
+    }
+
+    .glassmorphic .forecast-day {
+      font-size: 12px;
+      font-weight: 500;
+      color: rgba(255,255,255,0.7);
+    }
+
+    .glassmorphic .forecast-icon {
+      font-size: 32px;
+      margin: 8px 0;
+    }
+
+    .glassmorphic .forecast-temp {
+      font-size: 18px;
+      font-weight: 600;
+      color: white;
+    }
+
+    .glassmorphic .forecast-low {
+      font-size: 14px;
+      font-weight: 400;
+      color: rgba(255,255,255,0.6);
+    }
+
+    /* ========== MATERIAL DESIGN THEME ========== */
+    body.material {
+      background: #F5F5F5;
+    }
+
+    .material .container {
+      max-width: 430px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+
+    .material .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .material .location {
+      font-size: 22px;
+      font-weight: 400;
+      color: #1D1B20;
+    }
+
+    .material .style-btn {
+      width: 48px;
+      height: 48px;
+      background: #E8DEF8;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 18px;
+      transition: all 0.2s ease;
+      color: #1D1B20;
+    }
+
+    .material .style-btn:hover {
+      background: #D0BCFF;
+    }
+
+    .material .main-card {
+      background: #FFFBFE;
+      border-radius: 28px;
+      padding: 24px;
+      margin-bottom: 16px;
+      text-align: center;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+    }
+
+    .material .weather-icon {
+      font-size: 72px;
+      margin-bottom: 8px;
+    }
+
+    .material .temperature {
+      font-size: 64px;
+      font-weight: 400;
+      color: #1D1B20;
+      line-height: 1;
+    }
+
+    .material .condition {
+      font-size: 18px;
+      font-weight: 500;
+      color: #49454F;
+      margin-top: 8px;
+    }
+
+    .material .feels-like {
+      font-size: 14px;
+      font-weight: 400;
+      color: #79747E;
+      margin-top: 4px;
+    }
+
+    .material .section-title {
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 0.1px;
+      margin: 24px 0 12px;
+      color: #49454F;
+    }
+
+    .material .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .material .stat-card {
+      background: #FFFBFE;
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+
+    .material .stat-card.humidity { background: #E3F2FD; }
+    .material .stat-card.wind { background: #E8F5E9; }
+    .material .stat-card.uv { background: #FFF8E1; }
+    .material .stat-card.rain { background: #F3E5F5; }
+
+    .material .stat-icon {
+      font-size: 24px;
+      margin-bottom: 8px;
+    }
+
+    .material .stat-label {
+      font-size: 12px;
+      font-weight: 500;
+      color: #79747E;
+    }
+
+    .material .stat-value {
+      font-size: 22px;
+      font-weight: 500;
+      color: #1D1B20;
+    }
+
+    .material .forecast-scroll {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+    }
+
+    .material .forecast-scroll::-webkit-scrollbar { display: none; }
+
+    .material .forecast-card {
+      flex-shrink: 0;
+      background: #FFFBFE;
+      border-radius: 16px;
+      padding: 12px 16px;
+      text-align: center;
+      min-width: 80px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+
+    .material .forecast-day {
+      font-size: 12px;
+      font-weight: 500;
+      color: #79747E;
+    }
+
+    .material .forecast-icon {
+      font-size: 28px;
+      margin: 6px 0;
+    }
+
+    .material .forecast-temp {
+      font-size: 16px;
+      font-weight: 500;
+      color: #1D1B20;
+    }
+
+    .material .forecast-low {
+      font-size: 14px;
+      font-weight: 400;
+      color: #79747E;
+    }
+
+    /* ========== NEUMORPHIC THEME ========== */
+    body.neumorphic {
+      background: #E0E5EC;
+    }
+
+    .neumorphic .container {
+      max-width: 430px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .neumorphic .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .neumorphic .location {
+      font-size: 22px;
+      font-weight: 600;
+      color: #4A5568;
+    }
+
+    .neumorphic .style-btn {
+      width: 50px;
+      height: 50px;
+      background: #E0E5EC;
+      border: none;
+      border-radius: 15px;
+      cursor: pointer;
+      font-size: 18px;
+      box-shadow: 8px 8px 16px #a3b1c6, -8px -8px 16px #ffffff;
+      transition: all 0.2s ease;
+      color: #4A5568;
+    }
+
+    .neumorphic .style-btn:hover {
+      box-shadow: 6px 6px 12px #a3b1c6, -6px -6px 12px #ffffff;
+    }
+
+    .neumorphic .style-btn:active {
+      box-shadow: inset 4px 4px 8px #a3b1c6, inset -4px -4px 8px #ffffff;
+    }
+
+    .neumorphic .main-card {
+      background: #E0E5EC;
+      border-radius: 30px;
+      padding: 32px;
+      margin-bottom: 24px;
+      text-align: center;
+      box-shadow: 12px 12px 24px #a3b1c6, -12px -12px 24px #ffffff;
+    }
+
+    .neumorphic .weather-icon {
+      font-size: 72px;
+      margin-bottom: 10px;
+      filter: drop-shadow(2px 2px 4px #a3b1c6);
+    }
+
+    .neumorphic .temperature {
+      font-size: 64px;
+      font-weight: 300;
+      color: #4A5568;
+      line-height: 1;
+    }
+
+    .neumorphic .condition {
+      font-size: 18px;
+      font-weight: 500;
+      color: #718096;
+      margin-top: 8px;
+    }
+
+    .neumorphic .feels-like {
+      font-size: 14px;
+      font-weight: 400;
+      color: #A0AEC0;
+      margin-top: 4px;
+    }
+
+    .neumorphic .section-title {
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin: 24px 0 16px;
+      color: #718096;
+    }
+
+    .neumorphic .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    .neumorphic .stat-card {
+      background: #E0E5EC;
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 8px 8px 16px #a3b1c6, -8px -8px 16px #ffffff;
+    }
+
+    .neumorphic .stat-icon {
+      font-size: 26px;
+      margin-bottom: 10px;
+    }
+
+    .neumorphic .stat-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #A0AEC0;
+    }
+
+    .neumorphic .stat-value {
+      font-size: 22px;
+      font-weight: 600;
+      color: #4A5568;
+    }
+
+    .neumorphic .forecast-scroll {
+      display: flex;
+      gap: 14px;
+      overflow-x: auto;
+      padding: 8px 0;
+    }
+
+    .neumorphic .forecast-scroll::-webkit-scrollbar { display: none; }
+
+    .neumorphic .forecast-card {
+      flex-shrink: 0;
+      background: #E0E5EC;
+      border-radius: 20px;
+      padding: 16px;
+      text-align: center;
+      min-width: 85px;
+      box-shadow: 6px 6px 12px #a3b1c6, -6px -6px 12px #ffffff;
+    }
+
+    .neumorphic .forecast-day {
+      font-size: 11px;
+      font-weight: 600;
+      color: #A0AEC0;
+      text-transform: uppercase;
+    }
+
+    .neumorphic .forecast-icon {
+      font-size: 28px;
+      margin: 8px 0;
+    }
+
+    .neumorphic .forecast-temp {
+      font-size: 18px;
+      font-weight: 600;
+      color: #4A5568;
+    }
+
+    .neumorphic .forecast-low {
+      font-size: 14px;
+      font-weight: 400;
+      color: #A0AEC0;
+    }
+
+    /* ========== SKEUOMORPHIC THEME ========== */
+    body.skeuomorphic {
+      background: linear-gradient(180deg, #2C3E50 0%, #1a252f 100%);
+      min-height: 100vh;
+    }
+
+    .skeuomorphic .container {
+      max-width: 430px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .skeuomorphic .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .skeuomorphic .location {
+      font-size: 20px;
+      font-weight: 600;
+      color: #ECF0F1;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+    }
+
+    .skeuomorphic .style-btn {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(145deg, #3d566e, #2c3e50);
+      border: 1px solid #4a6785;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 18px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
+      color: #ECF0F1;
+      transition: all 0.15s;
+    }
+
+    .skeuomorphic .style-btn:active {
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.4);
+      background: linear-gradient(145deg, #2c3e50, #3d566e);
+    }
+
+    .skeuomorphic .main-card {
+      background: linear-gradient(145deg, #34495e, #2c3e50);
+      border: 1px solid #4a6785;
+      border-radius: 20px;
+      padding: 24px;
+      margin-bottom: 20px;
+      text-align: center;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08);
+    }
+
+    .skeuomorphic .weather-icon {
+      font-size: 72px;
+      margin-bottom: 10px;
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4));
+    }
+
+    .skeuomorphic .temperature {
+      font-size: 64px;
+      font-weight: 300;
+      color: #ECF0F1;
+      line-height: 1;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .skeuomorphic .condition {
+      font-size: 18px;
+      font-weight: 500;
+      color: #BDC3C7;
+      margin-top: 8px;
+    }
+
+    .skeuomorphic .feels-like {
+      font-size: 14px;
+      color: #7F8C8D;
+      margin-top: 4px;
+    }
+
+    .skeuomorphic .section-title {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin: 24px 0 12px;
+      color: #7F8C8D;
+    }
+
+    .skeuomorphic .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .skeuomorphic .stat-card {
+      background: linear-gradient(145deg, #34495e, #2c3e50);
+      border: 1px solid #4a6785;
+      border-radius: 14px;
+      padding: 16px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05);
+    }
+
+    .skeuomorphic .stat-icon {
+      font-size: 24px;
+      margin-bottom: 8px;
+    }
+
+    .skeuomorphic .stat-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #7F8C8D;
+    }
+
+    .skeuomorphic .stat-value {
+      font-size: 22px;
+      font-weight: 500;
+      color: #ECF0F1;
+    }
+
+    .skeuomorphic .forecast-scroll {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+    }
+
+    .skeuomorphic .forecast-scroll::-webkit-scrollbar { display: none; }
+
+    .skeuomorphic .forecast-card {
+      flex-shrink: 0;
+      background: linear-gradient(145deg, #34495e, #2c3e50);
+      border: 1px solid #4a6785;
+      border-radius: 14px;
+      padding: 14px;
+      text-align: center;
+      min-width: 80px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05);
+    }
+
+    .skeuomorphic .forecast-day {
+      font-size: 11px;
+      font-weight: 600;
+      color: #7F8C8D;
+      text-transform: uppercase;
+    }
+
+    .skeuomorphic .forecast-icon {
+      font-size: 26px;
+      margin: 6px 0;
+    }
+
+    .skeuomorphic .forecast-temp {
+      font-size: 16px;
+      font-weight: 600;
+      color: #ECF0F1;
+    }
+
+    .skeuomorphic .forecast-low {
+      font-size: 13px;
+      color: #7F8C8D;
+    }
+
+    /* ========== MAXIMALIST THEME ========== */
+    body.maximalist {
+      background: linear-gradient(135deg, #FF6B6B, #FFE66D, #4ECDC4, #A855F7);
+      background-size: 400% 400%;
+      animation: gradientShift 8s ease infinite;
+    }
+
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .maximalist .container {
+      max-width: 430px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .maximalist .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .maximalist .location {
+      font-size: 26px;
+      font-weight: 900;
+      color: white;
+      text-shadow: 3px 3px 0 #FF6B6B, -2px -2px 0 #4ECDC4;
+    }
+
+    .maximalist .style-btn {
+      width: 56px;
+      height: 56px;
+      background: linear-gradient(145deg, #FFE66D, #FF6B6B);
+      border: 4px solid white;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 22px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+      transition: all 0.2s;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    .maximalist .style-btn:hover {
+      transform: scale(1.1) rotate(10deg);
+    }
+
+    .maximalist .main-card {
+      background: white;
+      border: 5px solid #1A1A1A;
+      border-radius: 30px;
+      padding: 28px;
+      margin-bottom: 20px;
+      text-align: center;
+      box-shadow: 10px 10px 0 #FF6B6B, 20px 20px 0 #4ECDC4;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .maximalist .main-card::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 10px,
+        rgba(255,107,107,0.1) 10px,
+        rgba(255,107,107,0.1) 20px
+      );
+      pointer-events: none;
+    }
+
+    .maximalist .weather-icon {
+      font-size: 90px;
+      margin-bottom: 10px;
+      animation: bounce 2s ease infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .maximalist .temperature {
+      font-size: 80px;
+      font-weight: 900;
+      background: linear-gradient(90deg, #FF6B6B, #A855F7, #4ECDC4);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+    }
+
+    .maximalist .condition {
+      font-size: 22px;
+      font-weight: 800;
+      color: #1A1A1A;
+      margin-top: 8px;
+      text-transform: uppercase;
+    }
+
+    .maximalist .feels-like {
+      font-size: 14px;
+      font-weight: 700;
+      color: #666;
+      margin-top: 4px;
+    }
+
+    .maximalist .section-title {
+      font-size: 16px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      margin: 28px 0 16px;
+      color: white;
+      text-shadow: 2px 2px 0 #1A1A1A;
+    }
+
+    .maximalist .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    .maximalist .stat-card {
+      background: white;
+      border: 4px solid #1A1A1A;
+      border-radius: 20px;
+      padding: 18px;
+      box-shadow: 6px 6px 0 #FFE66D;
+      transform: rotate(-1deg);
+      transition: all 0.2s;
+    }
+
+    .maximalist .stat-card:nth-child(2) { transform: rotate(1deg); box-shadow: 6px 6px 0 #4ECDC4; }
+    .maximalist .stat-card:nth-child(3) { transform: rotate(1.5deg); box-shadow: 6px 6px 0 #A855F7; }
+    .maximalist .stat-card:nth-child(4) { transform: rotate(-1.5deg); box-shadow: 6px 6px 0 #FF6B6B; }
+
+    .maximalist .stat-card:hover {
+      transform: rotate(0deg) scale(1.05);
+    }
+
+    .maximalist .stat-icon {
+      font-size: 30px;
+      margin-bottom: 8px;
+    }
+
+    .maximalist .stat-label {
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      color: #666;
+    }
+
+    .maximalist .stat-value {
+      font-size: 26px;
+      font-weight: 900;
+      color: #1A1A1A;
+    }
+
+    .maximalist .forecast-scroll {
+      display: flex;
+      gap: 14px;
+      overflow-x: auto;
+      padding: 10px 0;
+    }
+
+    .maximalist .forecast-scroll::-webkit-scrollbar { display: none; }
+
+    .maximalist .forecast-card {
+      flex-shrink: 0;
+      background: white;
+      border: 4px solid #1A1A1A;
+      border-radius: 20px;
+      padding: 16px;
+      text-align: center;
+      min-width: 95px;
+      box-shadow: 5px 5px 0 #1A1A1A;
+      transition: all 0.2s;
+    }
+
+    .maximalist .forecast-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 5px 10px 0 #1A1A1A;
+    }
+
+    .maximalist .forecast-day {
+      font-size: 12px;
+      font-weight: 800;
+      color: #FF6B6B;
+      text-transform: uppercase;
+    }
+
+    .maximalist .forecast-icon {
+      font-size: 34px;
+      margin: 8px 0;
+    }
+
+    .maximalist .forecast-temp {
+      font-size: 20px;
+      font-weight: 900;
+      color: #1A1A1A;
+    }
+
+    .maximalist .forecast-low {
+      font-size: 14px;
+      font-weight: 600;
+      color: #999;
+    }
+
+    /* Style Menu Dropdown */
+    .style-menu {
+      position: absolute;
+      top: 60px;
+      right: 20px;
+      background: white;
+      border-radius: 16px;
+      padding: 8px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+      z-index: 1000;
+      display: none;
+      min-width: 200px;
+    }
+
+    .style-menu.active {
+      display: block;
+      animation: fadeIn 0.2s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .style-option {
+      padding: 12px 16px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      color: #1A1A1A;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .style-option:hover {
+      background: #F5F5F5;
+    }
+
+    .style-option.active {
+      background: #E8DEF8;
+    }
+
+    .style-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      border: 2px solid #1A1A1A;
+    }
+  </style>
+</head>
+<body class="neobrutalist">
+  <div class="container">
+    <header class="header">
+      <h1 class="location">📍 Sydney</h1>
+      <button class="style-btn" onclick="toggleMenu()">🎨</button>
+    </header>
+
+    <div class="style-menu" id="styleMenu">
+      <div class="style-option active" onclick="setTheme('neobrutalist')">
+        <span class="style-dot" style="background: #FFE156;"></span>
+        Neobrutalist
+      </div>
+      <div class="style-option" onclick="setTheme('glassmorphic')">
+        <span class="style-dot" style="background: linear-gradient(135deg, #667eea, #764ba2);"></span>
+        Glassmorphic
+      </div>
+      <div class="style-option" onclick="setTheme('material')">
+        <span class="style-dot" style="background: #E8DEF8;"></span>
+        Material Design
+      </div>
+      <div class="style-option" onclick="setTheme('neumorphic')">
+        <span class="style-dot" style="background: #E0E5EC;"></span>
+        Neumorphic
+      </div>
+      <div class="style-option" onclick="setTheme('skeuomorphic')">
+        <span class="style-dot" style="background: #2C3E50;"></span>
+        Skeuomorphic
+      </div>
+      <div class="style-option" onclick="setTheme('maximalist')">
+        <span class="style-dot" style="background: linear-gradient(90deg, #FF6B6B, #FFE66D, #4ECDC4);"></span>
+        Maximalist
+      </div>
+    </div>
+
+    <div class="main-card">
+      <div class="weather-icon">☀️</div>
+      <div class="temperature">28°</div>
+      <div class="condition">Sunny</div>
+      <div class="feels-like">Feels like 30°</div>
+    </div>
+
+    <div class="section-title">Current Conditions</div>
+    <div class="stats-grid">
+      <div class="stat-card humidity">
+        <div class="stat-icon">💧</div>
+        <div class="stat-label">Humidity</div>
+        <div class="stat-value">66%</div>
+      </div>
+      <div class="stat-card wind">
+        <div class="stat-icon">💨</div>
+        <div class="stat-label">Wind</div>
+        <div class="stat-value">20 km/h</div>
+      </div>
+      <div class="stat-card uv">
+        <div class="stat-icon">☀️</div>
+        <div class="stat-label">UV Index</div>
+        <div class="stat-value">High</div>
+      </div>
+      <div class="stat-card rain">
+        <div class="stat-icon">🌧️</div>
+        <div class="stat-label">Rain</div>
+        <div class="stat-value">10%</div>
+      </div>
+    </div>
+
+    <div class="section-title">7-Day Forecast</div>
+    <div class="forecast-scroll">
+      <div class="forecast-card">
+        <div class="forecast-day">Mon</div>
+        <div class="forecast-icon">☀️</div>
+        <div class="forecast-temp">29°</div>
+        <div class="forecast-low">22°</div>
+      </div>
+      <div class="forecast-card">
+        <div class="forecast-day">Tue</div>
+        <div class="forecast-icon">⛅</div>
+        <div class="forecast-temp">27°</div>
+        <div class="forecast-low">21°</div>
+      </div>
+      <div class="forecast-card">
+        <div class="forecast-day">Wed</div>
+        <div class="forecast-icon">🌧️</div>
+        <div class="forecast-temp">24°</div>
+        <div class="forecast-low">19°</div>
+      </div>
+      <div class="forecast-card">
+        <div class="forecast-day">Thu</div>
+        <div class="forecast-icon">⛈️</div>
+        <div class="forecast-temp">22°</div>
+        <div class="forecast-low">18°</div>
+      </div>
+      <div class="forecast-card">
+        <div class="forecast-day">Fri</div>
+        <div class="forecast-icon">⛅</div>
+        <div class="forecast-temp">25°</div>
+        <div class="forecast-low">20°</div>
+      </div>
+      <div class="forecast-card">
+        <div class="forecast-day">Sat</div>
+        <div class="forecast-icon">☀️</div>
+        <div class="forecast-temp">28°</div>
+        <div class="forecast-low">21°</div>
+      </div>
+      <div class="forecast-card">
+        <div class="forecast-day">Sun</div>
+        <div class="forecast-icon">☀️</div>
+        <div class="forecast-temp">30°</div>
+        <div class="forecast-low">23°</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const themes = ['neobrutalist', 'glassmorphic', 'material', 'neumorphic', 'skeuomorphic', 'maximalist'];
+    
+    function toggleMenu() {
+      const menu = document.getElementById('styleMenu');
+      menu.classList.toggle('active');
+    }
+
+    function setTheme(theme) {
+      const body = document.body;
+      themes.forEach(t => body.classList.remove(t));
+      body.classList.add(theme);
+      
+      // Update active state in menu
+      document.querySelectorAll('.style-option').forEach(opt => {
+        opt.classList.remove('active');
+        if (opt.textContent.toLowerCase().includes(theme.replace('morphic', '').substring(0, 4))) {
+          opt.classList.add('active');
+        }
+      });
+      
+      // Find and activate correct option
+      document.querySelectorAll('.style-option').forEach(opt => {
+        opt.classList.remove('active');
+      });
+      event.target.closest('.style-option').classList.add('active');
+      
+      toggleMenu();
+    }
+
+    // Close menu when clicking outside
+    document.addEventListener('click', (e) => {
+      const menu = document.getElementById('styleMenu');
+      const btn = document.querySelector('.style-btn');
+      if (!menu.contains(e.target) && !btn.contains(e.target)) {
+        menu.classList.remove('active');
+      }
+    });
+  </script>
+</body>
+</html>
